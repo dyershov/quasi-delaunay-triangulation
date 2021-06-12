@@ -35,6 +35,10 @@ class Torus:
                 np.hstack([(i,) * 3**self.__dimension_number for i in range(point_number)]),
                 np.arange(point_number) * 3**self.__dimension_number)
 
+    def points(self, coordinates):
+        import numpy as np
+        coordinates = np.array(coordinates).reshape((-1, self.__dimension_number+1))
+        return coordinates[:,:-1] / (1 - coordinates[:,-1].reshape((-1,1)) / self.__sphere_radius)
 
     def __convert(self, points):
         import numpy as np

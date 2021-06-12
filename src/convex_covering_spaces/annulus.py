@@ -37,6 +37,10 @@ class Annulus:
                 np.hstack([(i,) * self.__coordinate_number_per_point for i in range(point_number)]),
                 np.arange(point_number) * self.__coordinate_number_per_point)
 
+    def points(self, coordinates):
+        import numpy as np
+        coordinates = np.array(coordinates).reshape((-1, self.__dimension_number+1))
+        return coordinates[:,:-1] / (1 - coordinates[:,-1] / self.__sphere_radius)
 
     def __convert(self, points):
         import numpy as np

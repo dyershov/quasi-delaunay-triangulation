@@ -29,6 +29,11 @@ class Euclidean:
                 np.arange(len(points)),
                 np.arange(len(points)))
 
+    def points(self, coordinates):
+        import numpy as np
+        coordinates = np.array(coordinates).reshape((-1, self.__dimension_number+1))
+        return coordinates[:,:-1] / (1 - coordinates[:,-1] / self.__sphere_radius)
+
     def __convert(self, points):
         import numpy as np
         return np.array(points).reshape((-1, self.__dimension_number))
