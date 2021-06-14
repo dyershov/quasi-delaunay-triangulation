@@ -5,7 +5,7 @@ from setuptools import setup
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-packages = ['convex_covering_spaces', 'delaunay_triangulation', 'quasi_delaunay_triangulation']
+packages = ['convex_covering_spaces', 'data_structures', 'delaunay_triangulation', 'quasi_delaunay_triangulation']
 
 setup(name='pyQDT',
       version='0.1',

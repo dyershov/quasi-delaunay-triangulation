@@ -20,10 +20,10 @@ class DelaunayTriangulation:
         self.__faces = None
         self.__hyperplanes = None
         self.__neighbors = None
-        self.__visibility_dag = None
+        self.__front = None
+        self.__visibility_dag = dict()
         # self.__centers = None
         # self.__radii = None
-        # self.__front = None
 
     @property
     def coordinates(self):
@@ -45,8 +45,7 @@ class DelaunayTriangulation:
         import numpy as np
         if self.__faces is None:
             return None
-        front_index = np.array([key for key, value in self.__visibility_dag.items() if not value])
-        return self.__filter_external_simplices(self.__filter_infinite_simplices(self.__faces[front_index,:-1]))
+        return self.__filter_external_simplices(self.__filter_infinite_simplices(self.__faces[list(self.__front.data),:-1]))
 
     @property
     def neighbors(self):
@@ -98,12 +97,14 @@ class DelaunayTriangulation:
         # print("face number %d, face shape (%d, %d)" % (self.__face_number, *self.__faces.shape))
         # print("faces \n", self.__faces)
         # print("neighbors \n", self.__neighbors)
+        # print("front \n", self.__front.data)
         # print("visibility DAG \n", self.__visibility_dag)
         # print("coordinates \n", self.__coordinates)
         # print("hyperplanes \n", self.__hyperplanes)
         # print("="*100)
 
     def __create_first_faces(self):
+        from data_structures import SortedList
         import numpy as np
         hyper_simplex = np.arange(self.__n, dtype=np.int64)
 
@@ -119,7 +120,7 @@ class DelaunayTriangulation:
 
         self.__hyperplanes = np.vstack([self.__compute_face_hyperplane(face) for face in self.__faces])
 
-        self.__visibility_dag = dict([(i, []) for i in range(self.__n)])
+        self.__front = SortedList(range(self.__n))
 
         self.__face_number = self.__n
         self.__vertex_number = self.__n
@@ -148,9 +149,10 @@ class DelaunayTriangulation:
 
         added_face_indices = list(range(self.__face_number, self.__face_number + len(added_faces)))
         for face_index in visible_faces:
+            self.__front.remove(face_index)
             self.__visibility_dag[face_index] = added_face_indices
         for face_index in added_face_indices:
-            self.__visibility_dag[face_index] = []
+            self.__front.insert(face_index)
 
         added_faces = np.array(added_faces, dtype=np.int64)
         added_neighbors = np.hstack((-np.ones((len(added_faces), self.__d-1), dtype=np.int64),
@@ -202,10 +204,10 @@ class DelaunayTriangulation:
             if np.dot(self.__hyperplanes[face_index], affine_coordanates) > 0:
                 continue
 
-            next_faces = self.__visibility_dag[face_index]
-
-            if not next_faces:
+            if face_index in self.__front:
                 return face_index
+
+            next_faces = self.__visibility_dag[face_index]
 
             face_queue.extend(next_faces)
 
